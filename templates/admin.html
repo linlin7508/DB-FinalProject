@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="admin-box">
+  <h1>Admin Dashboard</h1>
+  {% if cinemas %}
+  {% for cinema in cinemas %}
+  <div class="cinema">
+    <div class="cinema-header">
+      <h2>{{ cinema.name }}</h2>
+      <p>Location: {{ cinema.location }}</p>
+      <p>Total Movies: {{ cinema.movies|length }}</p>
+    </div>
+
+    <div class="actions">
+      <a href="{{ url_for('admin.edit_cinema', cinema_id=cinema.id) }}" class="btn btn-edit">Edit Cinema</a>
+      <a href="{{ url_for('admin.delete_cinema', cinema_id=cinema.id) }}" class="btn btn-delete">Delete Cinema</a>
+      <a href="{{ url_for('admin.add_movie', cinema_id=cinema.id) }}" class="btn btn-add">Add Movie</a>
+    </div>
+
+    <div class="movies">
+      <h3>Movies</h3>
+      {% if cinema.movies %}
+      {% for movie in cinema.movies %}
+      <div class="movie {% if loop.last %}last{% endif %}">
+        <div class="movie-image">
+          <a href="{{ url_for('admin.edit_movie', movie_id=movie.id) }}">
+            <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" />
+          </a>
+        </div>
+        <div class="movie-details">
+          <h4>{{ movie.title }}</h4>
+          <p>Rating: {{ movie.rating }}</p>
+          <p>Comments: {{ movie.comments_count }}</p>
+          <div class="movie-actions">
+            <a href="{{ url_for('admin.edit_movie', movie_id=movie.id) }}" class="btn btn-edit">Edit</a>
+            <a href="{{ url_for('admin.delete_movie', movie_id=movie.id) }}" class="btn btn-delete">Delete</a>
+            <a href="{{ url_for('admin.toggle_status', movie_id=movie.id) }}" class="btn btn-toggle">
+              {% if movie.is_active %} Unpublish {% else %} Publish {% endif %}
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <p>No movies available for this cinema. Add one!</p>
+      {% endif %}
+    </div>
+  </div>
+  <hr />
+  {% endfor %}
+  {% else %}
+  <p>No cinemas available. Add one to get started!</p>
+  {% endif %}
+
+  <div class="add-cinema">
+    <a href="{{ url_for('admin.add_cinema') }}" class="btn btn-add">Add New Cinema</a>
+  </div>
+</div>
+
+<style>
+  .admin-box {
+    margin: 20px;
+  }
+  .cinema {
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    padding: 15px;
+  }
+  .cinema-header {
+    margin-bottom: 15px;
+  }
+  .actions, .movie-actions {
+    margin-top: 10px;
+  }
+  .actions a, .movie-actions a {
+    margin-right: 10px;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+  }
+  .btn-edit {
+    background-color: #007bff;
+    color: white;
+  }
+  .btn-delete {
+    background-color: #dc3545;
+    color: white;
+  }
+  .btn-add {
+    background-color: #28a745;
+    color: white;
+  }
+  .btn-toggle {
+    background-color: #ffc107;
+    color: black;
+  }
+  .movies {
+    margin-top: 20px;
+  }
+  .movie {
+    display: flex;
+    margin-bottom: 15px;
+  }
+  .movie-image img {
+    width: 100px;
+    height: 150px;
+    margin-right: 15px;
+  }
+  .movie-details {
+    flex-grow: 1;
+  }
+</style>
+{% endblock %}
