@@ -119,4 +119,8 @@ def search():
 
 @main.route('/admin', endpoint='admin_dashboard')
 def admin_dashboard():
-    return render_template('admin.html')
+    movies = Movie.query.filter_by(is_current=True).limit(6).all()
+    return render_template(
+        'admin.html',
+        movies=movies
+        )
