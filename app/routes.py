@@ -116,3 +116,7 @@ def search():
     else:
         movies = []
     return render_template("search_results.html", movies=movies, query=query)
+
+@main.route('/admin', endpoint='admin_dashboard')
+def admin_dashboard():
+    return render_template('admin.html')
