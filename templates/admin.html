@@ -4,84 +4,36 @@
       <img src="/static/images/admin-icon.png" alt="Admin Page" class="icon" />
   </a>
   </div>
-<div class="box">
-  <div class="head">
-    <h2>大都會影城</h2>
-    <p class="text-right"><a href="#">See all</a></p>
-  </div>
-  {% if movies %} {% for movie in movies %}
-  <div class="movie {% if loop.last %}last{% endif %}">
-    <div class="movie-image">
-      <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}">
-        <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" />
-      </a>
-    </div>
-    <div class="rating">
-      <p>RATING</p>
-      <div class="stars">
-        <div class="stars-in"></div>
-      </div>
-      <span class="comments">{{ movie.comments_count }}</span>
-    </div>
-  </div>
-  {% endfor %} {% else %}
-  <p>No movies available at the moment. Please check back later!</p>
-  {% endif %}
-  <div class="cl">&nbsp;</div>
-</div>
-
-<div class="box">
-    <div class="head">
-      <h2>新光影城</h2>
-      <p class="text-right"><a href="#">See all</a></p>
-    </div>
-    {% if movies %} {% for movie in movies %}
-    <div class="movie {% if loop.last %}last{% endif %}">
-      <div class="movie-image">
-        <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}">
-          <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" />
-        </a>
-      </div>
-      <div class="rating">
-        <p>RATING</p>
-        <div class="stars">
-          <div class="stars-in"></div>
-        </div>
-        <span class="comments">{{ movie.comments_count }}</span>
-      </div>
-    </div>
-    {% endfor %} {% else %}
-    <p>No movies available at the moment. Please check back later!</p>
-    {% endif %}
-    <div class="cl">&nbsp;</div>
-  </div>
-  
+  {% for cinema, movies in cinema_movies.items() %}
   <div class="box">
     <div class="head">
-      <h2>威秀影城</h2>
+      <h2>{{ cinema.name }}</h2>
       <p class="text-right"><a href="#">See all</a></p>
     </div>
-    {% if movies %} {% for movie in movies %}
-    <div class="movie {% if loop.last %}last{% endif %}">
-      <div class="movie-image">
-        <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}">
-          <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" />
-        </a>
-      </div>
-      <div class="rating">
-        <p>RATING</p>
-        <div class="stars">
-          <div class="stars-in"></div>
+    {% if movies %}
+      {% for movie in movies[:10] %}
+      <div class="movie {% if loop.last %}last{% endif %}">
+        <div class="movie-image">
+          <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}">
+            <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" />
+          </a>
         </div>
-        <span class="comments">{{ movie.comments_count }}</span>
+        <div class="rating">
+          <p>RATING</p>
+          <div class="stars">
+            <div class="stars-in"></div>
+          </div>
+          <span class="comments">{{ movie.comments_count }}</span>
+        </div>
       </div>
-    </div>
-    {% endfor %} {% else %}
+      {% endfor %}
+    {% else %}
     <p>No movies available at the moment. Please check back later!</p>
     {% endif %}
     <div class="cl">&nbsp;</div>
   </div>
-
+  {% endfor %}
+  
 <style>
   .admin-icon {
     text-align: right;
