@@ -119,8 +119,23 @@ def search():
 
 @main.route('/admin', endpoint='admin_dashboard')
 def admin_dashboard():
-    movies = Movie.query.filter_by(is_current=True).limit(6).all()
+    # Fetch all cinemas
+    cinemas = Cinema.query.all()
+
+    # Create a dictionary mapping cinemas to their individual movie lists
+    cinema_movies = {}
+    for cinema in cinemas:
+        # Query all screening times for this cinema
+        screening_times = ScreeningTime.query.filter_by(cinema_id=cinema.id).all()
+
+        # Extract unique movies from the screening times
+        movies = {screening.movie for screening in screening_times if screening.movie.is_current}
+        
+        # Convert the set of movies to a list and store in the dictionary
+        cinema_movies[cinema] = list(movies)
+
     return render_template(
         'admin.html',
-        movies=movies
-        )
+        cinema_movies=cinema_movies
+    )
+
