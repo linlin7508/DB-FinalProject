@@ -1,5 +1,5 @@
 # app/routes.py
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
 from app.models import User, Movie, Cinema, ScreeningTime, Booking, Hall
@@ -91,38 +91,64 @@ def book_seat(screening_id):
     form.screening_time.choices = [
         (screening.id, screening.date)
     ] 
-
-    # form.cinema.choices = [(cinema.id, cinema.name) for cinema in Cinema.query.all()]
-    # form.movie.choices = [(movie.id, movie.title) for movie in Movie.query.all()]
-    # form.screening_time.choices = [(date.id, date.date) for date in ScreeningTime.query.get(screening_id)]
-
+    bill_detail = {'name':User.query.filter_by(id=current_user.id).first().username,
+                   'cinema': screening.cinema.name,
+                    'hall' : screening.hall.name,
+                    'movie': screening.movie.title, 
+                   'id':[],
+                   'price':[]}
     if request.method == 'POST':
         app.logging.debug(f"Form data: {request.form}") ## 還要設定 cinima 和 movie screening_time
         if form.validate_on_submit():
-            # Check if seat is already booked
-            existing_booking = Booking.query.filter_by(
-                screening_id=screening_id, seat_number=form.seat_number.data
-            ).first()
+            app.logging.debug(form.seat_number.data.split(','))
+            for seat in form.seat_number.data.split(','):
+                # Check if seat is already booked
+                existing_booking = Booking.query.filter_by(
+                    screening_id=screening_id, seat_number=seat
+                ).first()
 
-            if existing_booking:
-                flash("This seat is already booked", "danger")
-                return render_template("booking.html", form=form, screening=screening)
+                if existing_booking:
+                    flash("This seat is already booked", "danger")
+                    return render_template("booking.html", form=form, screening=screening)
 
-            # Create new booking
-            booking = Booking(
-                user_id=current_user.id,
-                screening_id=screening_id,
-                seat_number=form.seat_number.data,
-            )
-            db.session.add(booking)
-            db.session.commit()
-            flash("Booking successful!", "success")
-            return redirect(url_for("main.home"))
+                # Create new booking
+                booking = Booking(
+                    user_id=current_user.id,
+                    screening_id=screening_id,
+                    seat_number=seat,
+                )
+                db.session.add(booking)
+                db.session.commit()
+                flash("Booking successful!", "success")
+                bill_detail["id"].append(booking.id)
+                bill_detail["price"].append(ScreeningTime.query.with_entities(ScreeningTime.price).filter_by(id = screening_id).one()[0])
+        
+            app.logging.debug(bill_detail)
+            session['bill_detail'] = bill_detail
+            return redirect(url_for("main.payment"))
         else:
             app.logging.debug(f"Form errors: {form.errors}")
 
     return render_template("booking.html", form=form, screening=screening,seating_chart=seating_chart)
 
+@main.route("/book/bill/", methods=["GET", "POST"])
+@login_required
+def payment():
+    bill_detail = session.get('bill_detail', [])
+    app.logging.debug(bill_detail)
+    name = bill_detail['name']
+    ids = bill_detail['id']
+    price = bill_detail['price']
+    price_sum = sum(price)
+    return render_template("bill.html"
+                           ,name=name
+                           ,book_id=ids
+                           ,price=price
+                           ,price_sum=price_sum
+                           ,cinema=bill_detail['cinema']
+                           ,hall=bill_detail['hall']
+                           ,movie=bill_detail['movie'])
+    return redirect(url_for("main.home"))
 
 
 @auth.route("/register", methods=["GET", "POST"])
