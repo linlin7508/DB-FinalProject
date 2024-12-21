@@ -30,15 +30,44 @@ content %}
 
 
   <button type="submit">Book</button>
+</form>
+
+<script>
+  function toggleSeat(button) {
+      
+      const inputField = document.querySelector('input[name="seat_number"]');
+      console.log(inputField)
+      // // 如果座位已被選定，則取消選擇並清空輸入框
+      if (button.classList.contains('select')) {
+          button.classList.remove('select');
+          button.classList.add('available');
+          if (inputField) inputField.value = ''; // 清空座位號
+      }
+      // // 如果座位是可用的，則標記為選定並設置輸入框值
+      else if (button.classList.contains('available')) {
+          // 確保只有一個座位被選中
+          const selectedSeat = document.querySelector('.seat.select');
+          if (selectedSeat) {
+              selectedSeat.classList.remove('select');
+              selectedSeat.classList.add('available');
+          }
   
+          button.classList.remove('available');
+          button.classList.add('select');
+          if (inputField) inputField.value = button.getAttribute('title').replace('Seat ', ''); // 填入座位號
+      }
+  }
+  </script>
+  
+
   <div>
     {% for row in seating_chart %}
     <div class="row">
-        Row {{ loop.index }}:
+        Row {{ '%02d' % loop.index }}:
         {% for seat in row %}
-          <p class="seat {{ seat.status }}" title="Seat {{ seat.seat_number }}">
+          <button class="seat {{ seat.status }}" title="Seat {{ seat.seat_number }}" onclick="toggleSeat(this)">
             {{ '%03d' % seat.seat_number }}
-          </p>
+          </button>
         {% endfor %}
     </div>
     {% endfor %}
