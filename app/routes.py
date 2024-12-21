@@ -2,12 +2,12 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
-from app.models import User, Movie, Cinema, ScreeningTime, Booking
+from app.models import User, Movie, Cinema, ScreeningTime, Booking, Hall
 from app.forms import RegistrationForm, LoginForm, BookingForm
 
 main = Blueprint("main", __name__)
 auth = Blueprint("auth", __name__)
-
+import app
 
 @main.route("/")
 def home():
@@ -50,28 +50,79 @@ def book_seat(screening_id):
     screening = ScreeningTime.query.get_or_404(screening_id)
     form = BookingForm()
 
-    if form.validate_on_submit():
-        # Check if seat is already booked
-        existing_booking = Booking.query.filter_by(
-            screening_id=screening_id, seat_number=form.seat_number.data
-        ).first()
+    bookings = Booking.query.filter_by(screening_id=screening_id).all()
+    screening.cinema_id
+    total_seats =  Hall.query.with_entities(Hall.size).filter_by(id = screening.hall.id).one()[0]
+    # 定義座位表（假設一個固定座位結構）
+    seats_per_row = 10
+    total_rows = total_seats // seats_per_row
+    
+    seating_chart = [ # 初始化座位表
+        [{'seat_number': row * seats_per_row + seat + 1, 'status': 'available'} for seat in range(seats_per_row)]
+        for row in range(total_rows)
+    ]
+    # app.logging.debug(seating_chart)
+    # 標記已預約的座位
+    for booking in bookings:
+        seat_number = int(booking.seat_number)
+        row = (seat_number - 1) // seats_per_row
+        seat = (seat_number - 1) % seats_per_row
 
-        if existing_booking:
-            flash("This seat is already booked", "danger")
-            return render_template("booking.html", form=form, screening=screening)
+        # 標記該座位為已預約
+        if 0 <= row < total_rows and 0 <= seat < seats_per_row:
+            seating_chart[row][seat]['status'] = 'booked'
+        else:
+            print(f"Invalid seat number: {seat_number}")
 
-        # Create new booking
-        booking = Booking(
-            user_id=current_user.id,
-            screening_id=screening_id,
-            seat_number=form.seat_number.data,
-        )
-        db.session.add(booking)
-        db.session.commit()
-        flash("Booking successful!", "success")
-        return redirect(url_for("main.home"))
 
-    return render_template("booking.html", form=form, screening=screening)
+    # 根據 screening_id 過濾相關資料並生成選項
+    form.cinema.choices = [
+        (screening.cinema.id, screening.cinema.name)
+    ]
+
+    form.hall.choices = [
+        (screening.hall.id, screening.hall.name)
+    ] 
+    
+    form.movie.choices = [
+        (screening.movie.id, screening.movie.title)
+    ]  
+    
+    form.screening_time.choices = [
+        (screening.id, screening.date)
+    ] 
+
+    # form.cinema.choices = [(cinema.id, cinema.name) for cinema in Cinema.query.all()]
+    # form.movie.choices = [(movie.id, movie.title) for movie in Movie.query.all()]
+    # form.screening_time.choices = [(date.id, date.date) for date in ScreeningTime.query.get(screening_id)]
+
+    if request.method == 'POST':
+        app.logging.debug(f"Form data: {request.form}") ## 還要設定 cinima 和 movie screening_time
+        if form.validate_on_submit():
+            # Check if seat is already booked
+            existing_booking = Booking.query.filter_by(
+                screening_id=screening_id, seat_number=form.seat_number.data
+            ).first()
+
+            if existing_booking:
+                flash("This seat is already booked", "danger")
+                return render_template("booking.html", form=form, screening=screening)
+
+            # Create new booking
+            booking = Booking(
+                user_id=current_user.id,
+                screening_id=screening_id,
+                seat_number=form.seat_number.data,
+            )
+            db.session.add(booking)
+            db.session.commit()
+            flash("Booking successful!", "success")
+            return redirect(url_for("main.home"))
+        else:
+            app.logging.debug(f"Form errors: {form.errors}")
+
+    return render_template("booking.html", form=form, screening=screening,seating_chart=seating_chart)
+
 
 
 @auth.route("/register", methods=["GET", "POST"])

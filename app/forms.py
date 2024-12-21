@@ -1,6 +1,6 @@
 # forms.py
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 from app.models import User
 
@@ -36,8 +36,9 @@ class LoginForm(FlaskForm):
 
 
 class BookingForm(FlaskForm):
-    cinema = StringField("Cinema", validators=[DataRequired()])
-    movie = StringField("Movie", validators=[DataRequired()])
-    screening_time = StringField("Screening Time", validators=[DataRequired()])
+    cinema = SelectField("Cinema", validators=[DataRequired()])
+    movie = SelectField("Movie", validators=[DataRequired()])
+    hall = SelectField("Hall", validators=[DataRequired()])
+    screening_time = SelectField("Screening Time", validators=[DataRequired()])
     seat_number = StringField("Seat Number", validators=[DataRequired()])
     submit = SubmitField("Book Seat")
