@@ -91,7 +91,9 @@ def register():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
+        admin=User.query.filter_by(email=form.email.data).first()
         # Special case: Check for admin credentials
+        login_user(admin)
         if form.email.data == "admin@example.com" and form.password.data == "admin123":
             # Redirect to admin dashboard if credentials match
             return redirect(url_for("main.admin_dashboard"))

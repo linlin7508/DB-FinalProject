@@ -166,12 +166,10 @@ def init_db():
     movies = seed_movies()
     cinemas = seed_cinemas()
     users = seed_users()
-    admin =create_admin()
 
     db.session.add_all(movies)
     db.session.add_all(cinemas)
     db.session.add_all(users)
-    db.session.add_all(admin)
     db.session.commit()
 
     screenings = create_fixed_screening_times(movies, cinemas)
