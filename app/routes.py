@@ -47,6 +47,7 @@ def toggle_favorite(movie_id):
 @main.route("/book/<int:screening_id>", methods=["GET", "POST"])
 @login_required
 def book_seat(screening_id):
+    
     screening = ScreeningTime.query.get_or_404(screening_id)
     form = BookingForm()
 
@@ -100,7 +101,7 @@ def book_seat(screening_id):
     if request.method == 'POST':
         app.logging.debug(f"Form data: {request.form}") ## 還要設定 cinima 和 movie screening_time
         if form.validate_on_submit():
-            app.logging.debug(form.seat_number.data.split(','))
+            # app.logging.debug(form.seat_number.data.split(','))
             for seat in form.seat_number.data.split(','):
                 # Check if seat is already booked
                 existing_booking = Booking.query.filter_by(
@@ -122,8 +123,8 @@ def book_seat(screening_id):
                 flash("Booking successful!", "success")
                 bill_detail["id"].append(booking.id)
                 bill_detail["price"].append(ScreeningTime.query.with_entities(ScreeningTime.price).filter_by(id = screening_id).one()[0])
-        
-            app.logging.debug(bill_detail)
+             
+            # app.logging.debug(bill_detail)
             session['bill_detail'] = bill_detail
             return redirect(url_for("main.payment"))
         else:
@@ -148,7 +149,7 @@ def payment():
                            ,cinema=bill_detail['cinema']
                            ,hall=bill_detail['hall']
                            ,movie=bill_detail['movie'])
-    return redirect(url_for("main.home"))
+    
 
 
 @auth.route("/register", methods=["GET", "POST"])
