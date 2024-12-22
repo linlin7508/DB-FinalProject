@@ -1,39 +1,32 @@
-{% extends "base.html" %} {% block content %}
-<div class="admin-icon">
-    <a href="{{ url_for('main.admin_dashboard') }}" title="Go back to Main Page">
-      <img src="/static/images/admin-icon.png" alt="Admin Page" class="icon" />
-  </a>
+{% extends "base.html" %} {% block content %} {% for cinema, movies in
+cinema_movies.items() %}
+<div class="box">
+  <div class="head">
+    <h2>{{ cinema.name }}</h2>
+    <p class="text-right"><a href="#">See all</a></p>
   </div>
-  {% for cinema, movies in cinema_movies.items() %}
-  <div class="box">
-    <div class="head">
-      <h2>{{ cinema.name }}</h2>
-      <p class="text-right"><a href="#">See all</a></p>
+  {% if movies %} {% for movie in movies[:10] %}
+  <div class="movie {% if loop.last %}last{% endif %}">
+    <div class="movie-image">
+      <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}">
+        <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" />
+      </a>
     </div>
-    {% if movies %}
-      {% for movie in movies[:10] %}
-      <div class="movie {% if loop.last %}last{% endif %}">
-        <div class="movie-image">
-          <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}">
-            <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" />
-          </a>
-        </div>
-        <div class="rating">
-          <p>RATING</p>
-          <div class="stars">
-            <div class="stars-in"></div>
-          </div>
-          <span class="comments">{{ movie.comments_count }}</span>
-        </div>
+    <div class="rating">
+      <p>RATING</p>
+      <div class="stars">
+        <div class="stars-in"></div>
       </div>
-      {% endfor %}
-    {% else %}
-    <p>No movies available at the moment. Please check back later!</p>
-    {% endif %}
-    <div class="cl">&nbsp;</div>
+      <span class="comments">{{ movie.comments_count }}</span>
+    </div>
   </div>
-  {% endfor %}
-  
+  {% endfor %} {% else %}
+  <p>No movies available at the moment. Please check back later!</p>
+  {% endif %}
+  <div class="cl">&nbsp;</div>
+</div>
+{% endfor %}
+
 <style>
   .admin-icon {
     text-align: right;

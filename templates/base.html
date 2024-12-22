@@ -27,6 +27,25 @@
         <div id="navigation">
           <ul>
             <li>
+              {% if current_user.is_authenticated and current_user.username ==
+              "admin" %}
+              <div class="admin-icon">
+                <a
+                  href="{{ url_for('main.admin_dashboard') }}"
+                  title="Go to Admin Page"
+                >
+                  <img
+                    src="/static/images/admin-icon.png"
+                    alt="Admin Page"
+                    class="icon"
+                  />
+                </a>
+              </div>
+              <a href="{{ url_for('main.admin_dashboard') }}">Admin Page</a>
+              {% endif %}
+            </li>
+
+            <li>
               <a class="active" href="{{ url_for('main.home') }}">HOME</a>
             </li>
             <li><a href="{{ url_for('main.cinemas') }}">Cinemas</a></li>

@@ -124,24 +124,23 @@ def search():
 
 
 @main.route("/admin", endpoint="admin_dashboard")
+@login_required
 def admin_dashboard():
+    # 確認是否為管理員
+    if current_user.username != "admin":
+        flash("Access denied. Admins only.", "danger")
+        return redirect(url_for("main.home"))
+
     # Fetch all cinemas
     cinemas = Cinema.query.all()
-
-    # Create a dictionary mapping cinemas to their individual movie lists
     cinema_movies = {}
     for cinema in cinemas:
-        # Query all screening times for this cinema
         screening_times = ScreeningTime.query.filter_by(cinema_id=cinema.id).all()
-
-        # Extract unique movies from the screening times
         movies = {
             screening.movie
             for screening in screening_times
             if screening.movie.is_current
         }
-
-        # Convert the set of movies to a list and store in the dictionary
         cinema_movies[cinema] = list(movies)
 
     return render_template("admin.html", cinema_movies=cinema_movies)
