@@ -91,6 +91,14 @@ def register():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
+        #admin=User.query.filter_by(email=form.email.data).first()
+        # Special case: Check for admin credentials
+        #login_user(admin)
+        if form.email.data == "admin@example.com" and form.password.data == "admin123":
+            # Redirect to admin dashboard if credentials match
+            return redirect(url_for("main.admin_dashboard"))
+    
+    if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
             login_user(user)
@@ -116,3 +124,26 @@ def search():
     else:
         movies = []
     return render_template("search_results.html", movies=movies, query=query)
+
+@main.route('/admin', endpoint='admin_dashboard')
+def admin_dashboard():
+    # Fetch all cinemas
+    cinemas = Cinema.query.all()
+
+    # Create a dictionary mapping cinemas to their individual movie lists
+    cinema_movies = {}
+    for cinema in cinemas:
+        # Query all screening times for this cinema
+        screening_times = ScreeningTime.query.filter_by(cinema_id=cinema.id).all()
+
+        # Extract unique movies from the screening times
+        movies = {screening.movie for screening in screening_times if screening.movie.is_current}
+        
+        # Convert the set of movies to a list and store in the dictionary
+        cinema_movies[cinema] = list(movies)
+
+    return render_template(
+        'admin.html',
+        cinema_movies=cinema_movies
+    )
+
