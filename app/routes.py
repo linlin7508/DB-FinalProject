@@ -1,4 +1,3 @@
-# app/routes.py
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
@@ -11,17 +10,17 @@ auth = Blueprint("auth", __name__)
 
 @main.route("/")
 def home():
-    movies = Movie.query.filter_by(is_current=True).limit(6).all()
-    # top_rated_movies = Movie.query.order_by(Movie.rating.desc()).limit(6).all()
-    # most_commented_movies = (
-    #     Movie.query.order_by(Movie.comments_count.desc()).limit(6).all()
-    # )
+    movies = Movie.query.filter_by(is_current=True).limit(10).all()
+    top_rated_movies = Movie.query.order_by(Movie.rating.desc()).limit(5).all()
+    most_commented_movies = (
+        Movie.query.order_by(Movie.comments_count.desc()).limit(5).all()
+    )
 
     return render_template(
         "home.html",
         movies=movies,
-        top_rated_movies=[],
-        most_commented_movies=[],
+        top_rated_movies=top_rated_movies,
+        most_commented_movies=most_commented_movies,
     )
 
 
@@ -51,7 +50,6 @@ def book_seat(screening_id):
     form = BookingForm()
 
     if form.validate_on_submit():
-        # Check if seat is already booked
         existing_booking = Booking.query.filter_by(
             screening_id=screening_id, seat_number=form.seat_number.data
         ).first()
@@ -60,7 +58,6 @@ def book_seat(screening_id):
             flash("This seat is already booked", "danger")
             return render_template("booking.html", form=form, screening=screening)
 
-        # Create new booking
         booking = Booking(
             user_id=current_user.id,
             screening_id=screening_id,
@@ -90,14 +87,14 @@ def register():
 @auth.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
-    if form.validate_on_submit():
-        #admin=User.query.filter_by(email=form.email.data).first()
-        # Special case: Check for admin credentials
-        #login_user(admin)
-        if form.email.data == "admin@example.com" and form.password.data == "admin123":
-            # Redirect to admin dashboard if credentials match
-            return redirect(url_for("main.admin_dashboard"))
-    
+    # if form.validate_on_submit():
+    #     # admin=User.query.filter_by(email=form.email.data).first()
+    #     # Special case: Check for admin credentials
+    #     # login_user(admin)
+    #     if form.email.data == "admin@example.com" and form.password.data == "admin123":
+    #         # Redirect to admin dashboard if credentials match
+    #         return redirect(url_for("main.admin_dashboard"))
+
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
@@ -125,7 +122,8 @@ def search():
         movies = []
     return render_template("search_results.html", movies=movies, query=query)
 
-@main.route('/admin', endpoint='admin_dashboard')
+
+@main.route("/admin", endpoint="admin_dashboard")
 def admin_dashboard():
     # Fetch all cinemas
     cinemas = Cinema.query.all()
@@ -137,13 +135,64 @@ def admin_dashboard():
         screening_times = ScreeningTime.query.filter_by(cinema_id=cinema.id).all()
 
         # Extract unique movies from the screening times
-        movies = {screening.movie for screening in screening_times if screening.movie.is_current}
-        
+        movies = {
+            screening.movie
+            for screening in screening_times
+            if screening.movie.is_current
+        }
+
         # Convert the set of movies to a list and store in the dictionary
         cinema_movies[cinema] = list(movies)
 
+    return render_template("admin.html", cinema_movies=cinema_movies)
+
+
+@main.route("/movies/showing")
+def movies_showing():
+    page = request.args.get("page", 1, type=int)
+    per_page = 12
+    movies_query = Movie.query.filter(Movie.is_current == True).order_by(
+        Movie.release_date.desc()
+    )
+    movies = movies_query.paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("movies_showing.html", movies=movies)
+
+
+@main.route("/movies/top-rated")
+def top_rated_movies():
+    page = request.args.get("page", 1, type=int)
+    per_page = 12
+    movies_query = Movie.query.order_by(Movie.rating.desc())
+    movies = movies_query.paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("top_rated_movies.html", movies=movies)
+
+
+@main.route("/movies/most-commented")
+def most_commented_movies():
+    page = request.args.get("page", 1, type=int)
+    per_page = 12
+    movies_query = Movie.query.order_by(Movie.comments_count.desc())
+    movies = movies_query.paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("most_commented_movies.html", movies=movies)
+
+
+@main.route("/cinemas")
+def cinemas():
+    cinemas = Cinema.query.all()
+    return render_template("cinemas.html", cinemas=cinemas)
+
+
+@main.route("/cinema/<int:cinema_id>/screenings")
+def cinema_screenings(cinema_id):
+    cinema = Cinema.query.get_or_404(cinema_id)
+    screenings = ScreeningTime.query.filter_by(cinema_id=cinema_id).all()
     return render_template(
-        'admin.html',
-        cinema_movies=cinema_movies
+        "cinema_screenings.html", cinema=cinema, screenings=screenings
     )
 
+
+@main.route("/my-list")
+@login_required
+def my_list():
+    favorite_movies = current_user.favorite_movies
+    return render_template("my_list.html", favorite_movies=favorite_movies)
