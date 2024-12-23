@@ -159,3 +159,39 @@ def cinema_screenings(cinema_id):
 def my_list():
     favorite_movies = current_user.favorite_movies
     return render_template("my_list.html", favorite_movies=favorite_movies)
+//by陳炫霖
+@main.route('/profile')
+def profile():
+    user = get_current_user()  # 例如：获取当前登录的用户对象
+    upcoming_movies = get_upcoming_movies()  # 获取即将上映的电影
+    friend_requests = get_friend_requests(user)  # 获取用户的朋友请求
+    return render_template('profile.html', user=user, upcoming_movies=upcoming_movies, friend_requests=friend_requests)
+
+@main.route('/update_status', methods=['POST'])
+def update_status():
+    user = get_current_user()  # 获取当前用户
+    status = request.form['status']  # 获取前端传来的状态
+    user.status = status  # 更新状态
+    db.session.commit()  # 保存到数据库
+    return redirect(url_for('profile'))  # 重定向回个人资料页
+
+@main.route('/accept_friend_request/<int:request_id>', methods=['POST'])
+def accept_friend_request(request_id):
+    request = FriendRequest.query.get(request_id)  # 获取朋友请求
+    request.status = 'accepted'  # 更新请求状态
+    db.session.commit()  # 保存修改
+    return redirect(url_for('profile'))  # 重定向回个人资料页
+
+@main.route('/reject_friend_request/<int:request_id>', methods=['POST'])
+def reject_friend_request(request_id):
+    request = FriendRequest.query.get(request_id)  # 获取朋友请求
+    request.status = 'rejected'  # 更新请求状态
+    db.session.commit()  # 保存修改
+    return redirect(url_for('profile'))  # 重定向回个人资料页
+
+@main.route('/profile')
+def profile():
+    upcoming_movies = get_upcoming_movies()  # 获取即将上映的电影
+    return render_template('profile.html', upcoming_movies=upcoming_movies)
+
+
