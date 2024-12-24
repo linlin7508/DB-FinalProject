@@ -159,3 +159,26 @@ def cinema_screenings(cinema_id):
 def my_list():
     favorite_movies = current_user.favorite_movies
     return render_template("my_list.html", favorite_movies=favorite_movies)
+
+@main.route('/update_status', methods=['POST'])
+@login_required
+def update_status():
+    status = request.form.get('status')
+    current_user.status = status
+    db.session.commit()
+    flash('狀態更新成功！', 'success')
+    return redirect(url_for('main.profile')) 
+
+@main.route('/profile')
+@login_required
+def profile():
+    upcoming_movies = Movie.query.filter(Movie.is_current == False).order_by(Movie.release_date).all()
+    return render_template('profile.html', user=current_user, upcoming_movies=upcoming_movies)
+
+@main.route('/favorite_movies')
+@login_required
+def favorite_movies():
+    favorite_movie_ids = db.session.query(user_favorites.c.movie_id).filter_by(user_id=current_user.id).all()
+    favorite_movie_ids = [movie_id[0] for movie_id in favorite_movie_ids]  
+    movies = Movie.query.filter(Movie.id.in_(favorite_movie_ids)).all()
+    return render_template('favorite_movies.html', movies=movies)

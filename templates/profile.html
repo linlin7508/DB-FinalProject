@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      display: flex;
+      max-width: 1200px;
+      margin: 20px auto;
+    }
+
+    /* Left Sidebar */
+    .sidebar {
+      width: 25%;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-pic {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto;
+      display: block;
+    }
+
+    .profile-info {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .profile-info h2 {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+
+    .profile-info p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .menu {
+      margin-top: 20px;
+    }
+
+    .menu a {
+      display: block;
+      text-decoration: none;
+      color: #333;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .menu a:hover {
+      background: #007bff;
+      color: #fff;
+    }
+
+    /* Main Content */
+    .main-content {
+      width: 50%;
+      margin: 0 20px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .status {
+      margin-bottom: 20px;
+    }
+
+    .status input {
+      width: calc(100% - 100px);
+      padding: 10px;
+      margin-right: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .status button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .status button:hover {
+      background-color: #0056b3;
+    }
+
+    .post {
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+
+    .post:last-child {
+      border-bottom: none;
+    }
+
+    .post h3 {
+      margin: 0 0 10px;
+    }
+
+    .post p {
+      margin: 0 0 10px;
+      color: #555;
+    }
+
+    /* Right Sidebar */
+    .right-sidebar {
+      width: 25%;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .right-sidebar h3 {
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .movie {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .movie button {
+      margin-top: 10px;
+      padding: 5px 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .movie button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+      <!-- 用户头像和基本信息 -->
+      <img src="https://via.placeholder.com/80" alt="Profile" class="profile-pic">
+      <div class="profile-info">
+        <h2>{{ user.username }}</h2>
+        <p>{{ user.email }}</p>
+      </div>
+      <!-- 菜单 -->
+      <div class="menu">
+        <a href="{{ url_for('main.my_friend') }}">我的朋友</a>
+        <a href="{{ url_for('main.my_comment') }}">我的貼文</a>
+        <div class="favorite-movie-btn">
+          <button onclick="window.location.href='{{ url_for('main.favorite_movies') }}'">
+            喜愛電影
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- 用户狀態更新 -->
+      <form action="{{ url_for('update_status') }}" method="POST">
+        <div class="status">
+          <input type="text" placeholder="狀態: Feeling Blue" id="status-input" value="{{ user.status or '' }}">
+          <button id="post-status-btn">發布</button>
+        </div>
+      </form>
+
+      <!-- 用戶最近的動態（這裡是狀態更新） -->
+      <div class="post">
+        <h3>{{ user.username }}</h3>
+        <p>{{ user.status or '沒有狀態更新' }}</p>
+      </div>
+
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="right-sidebar">
+      <h3>即將上映的電影</h3>
+      {% for movie in upcoming_movies %}
+      <div class="movie">
+        <p><strong>{{ movie.title }}</strong></p>
+        <p>{{ movie.release_date.strftime('%Y-%m-%d') }}</p>
+      </div>
+      {% endfor %}
+
+      <h3>已預定的電影</h3>
+      {% for movie in reserved_movies %}
+      <div class="movie">
+        <p><strong>{{ movie.title }}</strong></p>
+        <p>{{ movie.showtime.strftime('%Y-%m-%d %H:%M') }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>
