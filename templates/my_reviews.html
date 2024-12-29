@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reviews</title>
+</head>
+<body>
+    <h1>My Reviews</h1>
+    {% if reviews %}
+        <ul>
+            {% for review in reviews %}
+                <li>
+                    <h3>{{ review.movie.title }}</h3>
+                    <p><strong>Rating:</strong> {{ review.rate }}/5</p>
+                    <p>{{ review.content }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have not submitted any reviews yet.</p>
+    {% endif %}
+    <a href="{{ url_for('main.index') }}">Back to Home</a>
+</body>
+</html>

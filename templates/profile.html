@@ -172,7 +172,7 @@
       </div>
       <!-- 菜单 -->
       <div class="menu">
-        <a href="{{ url_for('main.my_friend') }}">我的朋友</a>
+        <a href="{{ url_for('main.user_friends') }}">我的朋友</a>
         <a href="{{ url_for('main.my_comment') }}">我的貼文</a>
         <div class="favorite-movie-btn">
           <button onclick="window.location.href='{{ url_for('main.favorite_movies') }}'">
@@ -185,7 +185,7 @@
     <!-- Main Content -->
     <div class="main-content">
       <!-- 用户狀態更新 -->
-      <form action="{{ url_for('update_status') }}" method="POST">
+      <form action="{{ url_for('main.update_status') }}" method="POST">
         <div class="status">
           <input type="text" placeholder="狀態: Feeling Blue" id="status-input" value="{{ user.status or '' }}">
           <button id="post-status-btn">發布</button>

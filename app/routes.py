@@ -182,3 +182,15 @@ def favorite_movies():
     favorite_movie_ids = [movie_id[0] for movie_id in favorite_movie_ids]  
     movies = Movie.query.filter(Movie.id.in_(favorite_movie_ids)).all()
     return render_template('favorite_movies.html', movies=movies)
+
+@main.route('/user_friends')
+@login_required
+def user_friends():
+    user_friends = current_user.friends  # 需要確保 User 模型有這個屬性
+    return render_template('user_friends.html', friends=user_friends)
+
+@main.route('/my_reviews')
+@login_required
+def my_reviews():
+    reviews = current_user.reviews  # 假設 User 模型有 comments 屬性
+    return render_template('my_reviews.html', reviews=reviews)
