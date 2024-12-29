@@ -80,31 +80,6 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .status {
-      margin-bottom: 20px;
-    }
-
-    .status input {
-      width: calc(100% - 100px);
-      padding: 10px;
-      margin-right: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-
-    .status button {
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .status button:hover {
-      background-color: #0056b3;
-    }
-
     .post {
       border-bottom: 1px solid #ddd;
       padding-bottom: 20px;
@@ -122,6 +97,13 @@
     .post p {
       margin: 0 0 10px;
       color: #555;
+    }
+
+    .post img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-top: 10px;
     }
 
     /* Right Sidebar */
@@ -164,16 +146,24 @@
   <div class="container">
     <!-- Left Sidebar -->
     <div class="sidebar">
-      <!-- 用户头像和基本信息 -->
+      <!-- 用戶頭像和基本信息 -->
       <img src="https://via.placeholder.com/80" alt="Profile" class="profile-pic">
       <div class="profile-info">
         <h2>{{ user.username }}</h2>
         <p>{{ user.email }}</p>
       </div>
-      <!-- 菜单 -->
+      <!-- 菜單 -->
       <div class="menu">
-        <a href="{{ url_for('main.user_friends') }}">我的朋友</a>
-        <a href="{{ url_for('main.my_comment') }}">我的貼文</a>
+        <div class="favorite-movie-btn">
+          <button onclick="window.location.href='{{ url_for('main.user_friends') }}'">
+            我的朋友
+          </button>
+        </div>
+        <div class="favorite-movie-btn">
+          <button onclick="window.location.href='{{ url_for('main.my_comment') }}'">
+            我的評論
+          </button>
+        </div>
         <div class="favorite-movie-btn">
           <button onclick="window.location.href='{{ url_for('main.favorite_movies') }}'">
             喜愛電影
@@ -184,20 +174,18 @@
 
     <!-- Main Content -->
     <div class="main-content">
-      <!-- 用户狀態更新 -->
-      <form action="{{ url_for('main.update_status') }}" method="POST">
-        <div class="status">
-          <input type="text" placeholder="狀態: Feeling Blue" id="status-input" value="{{ user.status or '' }}">
-          <button id="post-status-btn">發布</button>
-        </div>
-      </form>
+      <!-- 用戶最近的文章 -->
+      <article class="post">
+        <h3>董座豪宅必備私人電影院</h3>
+        <p>私人電影院設施不僅能提升董座家庭的娛樂品味，也讓家人能在繁忙的工作與生活中找到放鬆與享受的空間。從設計到選擇設備，每個環節都必須精心規劃，以確保家庭成員在居家影院中獲得最極致的娛樂體驗。</p>
+        <img src="{{ url_for('static', filename='images/article1.png') }}" alt="文章圖片 1">
+      </article>
 
-      <!-- 用戶最近的動態（這裡是狀態更新） -->
-      <div class="post">
-        <h3>{{ user.username }}</h3>
-        <p>{{ user.status or '沒有狀態更新' }}</p>
-      </div>
-
+      <article class="post">
+        <h3>「映台北」影展</h3>
+        <p>映台北」影展，透過六部與台北相關的經典電影，佈置限定版復古場景，讓你穿越時光回到過去的年代，還可以在館內尋寶就有機會拿到限量「映台北帆布提袋」。</p>
+        <img src="{{ url_for('static', filename='images/article2.png') }}" alt="文章圖片 1">
+      </article>
     </div>
 
     <!-- Right Sidebar -->
