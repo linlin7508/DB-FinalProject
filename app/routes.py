@@ -194,3 +194,21 @@ def user_friends():
 def my_reviews():
     reviews = current_user.reviews  # 假設 User 模型有 comments 屬性
     return render_template('my_reviews.html', reviews=reviews)
+
+@main.route("/add_friend", methods=["GET", "POST"])
+@login_required
+def add_friend():
+    form = AddFriendForm()
+    if form.validate_on_submit():
+        friend = User.query.filter_by(email=form.friend_email.data).first()
+        if not friend:
+            flash("User not found", "error")
+            return redirect(url_for("add_friend"))
+        if current_user.is_friend(friend):
+            flash("You are already friends with this user", "info")
+        else:
+            current_user.add_friend(friend)
+            db.session.commit()
+            flash(f"You are now friends with {friend.username}!", "success")
+        return redirect(url_for("add_friend"))
+    return render_template("add_friend.html", form=form)

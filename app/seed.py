@@ -142,6 +142,8 @@ def seed_users():
     ]
     for user in users:
         user.set_password("password123")
+    users[0].add_friend(users[1])  # user1 和 user2 成為好友
+    users[1].add_friend(users[2])  # user2 和 user3 成為好友
     return users
 
 

@@ -29,6 +29,25 @@ class User(UserMixin, db.Model):
         secondaryjoin=(id == user_friends.c.user2_id),
         backref=db.backref("friendship", lazy="dynamic"),
     )
+    
+    friends = db.relationship(
+        "User",
+        secondary=user_friends,
+        primaryjoin=(id == user_friends.c.user1_id),
+        secondaryjoin=(id == user_friends.c.user2_id),
+        backref=db.backref("friendship", lazy="dynamic"),
+    )
+
+    def add_friend(self, friend):
+        if friend not in self.friends:
+            self.friends.append(friend)
+
+    def remove_friend(self, friend):
+        if friend in self.friends:
+            self.friends.remove(friend)
+
+    def is_friend(self, friend):
+        return friend in self.friends
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -137,6 +156,19 @@ user_favorites = db.Table(
     db.Column("user_id", db.Integer, db.ForeignKey("user.id"), primary_key=True),
     db.Column("movie_id", db.Integer, db.ForeignKey("movie.id"), primary_key=True),
 )
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+
+    favorite_movies = db.relationship(
+        "Movie",
+        secondary="user_favorites",  # 指向中介表的名稱
+        backref=db.backref("fans", lazy="dynamic"),
+        lazy="dynamic",
+    )
 
 
 @login_manager.user_loader
